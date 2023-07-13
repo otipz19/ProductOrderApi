@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using WebApi.Data;
 
 namespace WebApi
@@ -21,6 +22,8 @@ namespace WebApi
             {
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("localhost"));
             });
+
+            builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             var app = builder.Build();
 

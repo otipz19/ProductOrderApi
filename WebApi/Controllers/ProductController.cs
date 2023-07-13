@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.Entities;
+using WebApi.Models.Product;
 
 namespace WebApi.Controllers
 {
@@ -10,22 +12,28 @@ namespace WebApi.Controllers
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public ProductController(AppDbContext context)
+        public ProductController(AppDbContext context,
+            IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+        public async Task<ActionResult<IEnumerable<GetProductDto>>> GetAll()
         {
-            return await _context.Products
+            var products = await _context.Products
                 .AsNoTracking()
                 .ToListAsync();
+            return products
+                .Select(_mapper.Map<GetProductDto>)
+                .ToList();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> Get(int id)
+        public async Task<ActionResult<GetProductDto>> Get(int id)
         {
             Product product = await _context.Products
                 .AsNoTracking()
@@ -34,32 +42,38 @@ namespace WebApi.Controllers
             if (product is null)
                 return NotFound();
 
-            return product;
+            return _mapper.Map<GetProductDto>(product);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> Post(Product product)
+        public async Task<ActionResult<GetProductDto>> Post(UpsertProductDto upsertDto)
         {
+            if (upsertDto is null)
+                return BadRequest();
+
+            Product product = _mapper.Map<Product>(upsertDto);
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = product.Id }, product);
+            GetProductDto getDto = _mapper.Map<GetProductDto>(product);
+            return CreatedAtAction(nameof(Get), new { id = getDto.Id }, getDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(int id, Product product)
+        public async Task<ActionResult> Put(int id, UpsertProductDto upsertDto)
         {
-            if (id != product.Id)
+            if (upsertDto is null)
                 return BadRequest();
 
-            Product toUpdate = await _context.Products
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+            Product toUpdate = await _context.Products.FindAsync(id);
 
             if (toUpdate is null)
                 return NotFound();
 
-            _context.Update(product);
+            _mapper.Map(upsertDto, toUpdate);
+
+            _context.Products.Update(toUpdate);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -68,13 +82,12 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            Product toDelete = await _context.Products
-                .FindAsync(id);
+            Product toDelete = await _context.Products.FindAsync(id);
 
             if(toDelete is null)
                 return NotFound();
 
-            _context.Remove(toDelete);
+            _context.Products.Remove(toDelete);
             await _context.SaveChangesAsync();
 
             return NoContent();
