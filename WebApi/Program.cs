@@ -37,7 +37,14 @@ namespace WebApi
 
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
+            builder.Services.AddScoped<DataSeeder, DataSeeder>();
+
             var app = builder.Build();
+
+            using(var scope = app.Services.CreateScope())
+            {
+                scope.ServiceProvider.GetService<DataSeeder>().Seed();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

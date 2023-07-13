@@ -1,5 +1,4 @@
-﻿using WebApi.Enums;
-using WebApi.Models.ProductInOrder;
+﻿using WebApi.Models.ProductInOrder;
 
 namespace WebApi.Models.Order
 {
@@ -9,7 +8,7 @@ namespace WebApi.Models.Order
 
         public DateTime CreatedAt { get; set; }
 
-        public OrderStatus Status { get; set; }
+        public Enums.OrderStatus Status { get; set; }
 
         public DateTime StatusChangedAt { get; set; }
 
