@@ -82,9 +82,11 @@ namespace WebApi.Controllers
         /// </summary>
         /// <response code="204">If successed</response>
         /// <response code="400">If validation failed</response>
+        /// <response code="404">If product with specified id does not exist</response>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Put(int id, UpsertProductDto upsertDto)
         {
             Product toUpdate = await _context.Products.FindAsync(id);
