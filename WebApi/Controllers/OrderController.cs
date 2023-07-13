@@ -68,7 +68,7 @@ namespace WebApi.Controllers
             return CreatedAtAction(nameof(Get), new { id = getDto.Id }, getDto);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, UpsertOrderDto upsertDto)
         {
             Order toUpdate = await _context.Orders
@@ -99,6 +99,33 @@ namespace WebApi.Controllers
                 return NotFound();
 
             _context.Orders.Remove(toDelete);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}/{statusId}")]
+        public async Task<ActionResult> ChangeStatus(int id, int statusId)
+        {
+            Order toUpdate = await _context.Orders.FindAsync(id);
+
+            if (toUpdate is null)
+                return NotFound();
+
+            OrderStatus status;
+            try
+            {
+                status = (OrderStatus)statusId;
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+            toUpdate.Status = status;
+            toUpdate.StatusChangedAt = DateTime.Now;
+
+            _context.Orders.Update(toUpdate);
             await _context.SaveChangesAsync();
 
             return NoContent();
