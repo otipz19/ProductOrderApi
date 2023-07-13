@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using WebApi.Enums;
+using WebApi.Models.OrderStatus;
 
 namespace WebApi.Controllers
 {
@@ -9,9 +9,15 @@ namespace WebApi.Controllers
     public class OrderStatusController : ControllerBase
     {
         [HttpGet]
-        public ActionResult<IEnumerable<OrderStatus>> GetAll()
+        public ActionResult<IEnumerable<GetOrderStatus>> GetAll()
         {
-            return Enum.GetValues<OrderStatus>(); 
+            return Enum.GetValues<OrderStatus>()
+                .Select(e => new GetOrderStatus()
+                {
+                    Id = (int)e,
+                    Name = e.ToString(),
+                })
+                .ToList(); 
         }
     }
 }
