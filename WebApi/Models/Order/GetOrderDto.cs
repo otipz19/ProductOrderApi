@@ -15,6 +15,6 @@ namespace WebApi.Models.Order
 
         public double OrderTotal { get; set; }
 
-        public List<ProductInOrderDto> Products { get; set; }
+        public List<GetProductInOrderDto> ProductsInOrder { get; set; }
     }
 }

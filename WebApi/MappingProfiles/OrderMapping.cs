@@ -9,7 +9,6 @@ namespace WebApi.MappingProfiles
         public OrderMapping()
         {
             CreateMap<Order, GetOrderDto>();
-            CreateMap<UpsertOrderDto, Order>();
         }
     }
 }

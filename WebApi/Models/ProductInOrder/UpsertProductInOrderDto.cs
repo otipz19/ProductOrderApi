@@ -2,10 +2,10 @@
 
 namespace WebApi.Models.ProductInOrder
 {
-    public class ProductInOrderDto
+    public class UpsertProductInOrderDto
     {
         public int Amount { get; set; }
 
-        public GetProductDto Product { get; set; }
+        public int ProductId { get; set; }
     }
 }

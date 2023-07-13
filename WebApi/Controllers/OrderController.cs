@@ -52,10 +52,13 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<GetOrderDto>> Post(UpsertOrderDto upsertDto)
         {
-            Order order = _mapper.Map<Order>(upsertDto);
+            Order order = new Order()
+            {
+                Status = OrderStatus.Pending,
+                StatusChangedAt = DateTime.Now,
+            };
 
-            order.Status = OrderStatus.Pending;
-            order.StatusChangedAt = DateTime.Now;
+            await SetProductInOrderListFromDto(upsertDto, order);
             SetOrdetTotal(order);
 
             _context.Orders.Add(order);
@@ -68,15 +71,20 @@ namespace WebApi.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(int id, UpsertOrderDto upsertDto)
         {
-            Order toUpdate = await _context.Orders.FindAsync(id);
+            Order toUpdate = await _context.Orders
+                .Include(o => o.ProductsInOrder)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
-            if(toUpdate is null)
+            if (toUpdate is null)
                 return NotFound();
 
-            _mapper.Map(upsertDto, toUpdate);
+            _context.ProductsInOrders.RemoveRange(toUpdate.ProductsInOrder);
+            toUpdate.ProductsInOrder.Clear();
+
+            await SetProductInOrderListFromDto(upsertDto, toUpdate);
             SetOrdetTotal(toUpdate);
 
-            _context.Update(toUpdate);
+            _context.Orders.Update(toUpdate);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -99,6 +107,25 @@ namespace WebApi.Controllers
         private void SetOrdetTotal(Order order)
         {
             order.OrderTotal = order.ProductsInOrder.Sum(p => p.Amount * p.Product.Price);
+        }
+
+        private async Task SetProductInOrderListFromDto(UpsertOrderDto upsertDto, Order order)
+        {
+            List<int> productIds = upsertDto.ProductsInOrder.Select(p => p.ProductId).ToList();
+            List<Product> products = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+
+            foreach (var product in products)
+            {
+                order.ProductsInOrder.Add(new ProductInOrder()
+                {
+                    Amount = upsertDto.ProductsInOrder.First(p => p.ProductId == product.Id).Amount,
+                    ProductId = product.Id,
+                    Product = product,
+                    Order = order,
+                });
+            }
         }
     }
 }

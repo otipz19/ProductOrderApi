@@ -4,6 +4,6 @@ namespace WebApi.Models.Order
 {
     public class UpsertOrderDto
     {
-        public List<ProductInOrderDto> ProductsInOrder { get; set; }
+        public List<UpsertProductInOrderDto> ProductsInOrder { get; set; }
     }
 }

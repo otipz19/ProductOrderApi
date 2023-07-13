@@ -46,7 +46,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Entities.Product", b =>
@@ -77,7 +77,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Entities.ProductInOrder", b =>
@@ -95,7 +95,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("ProductsInOrders");
+                    b.ToTable("ProductsInOrders", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Entities.ProductInOrder", b =>
