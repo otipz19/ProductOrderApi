@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.Reflection;
 using WebApi.Data;
 
@@ -16,7 +17,18 @@ namespace WebApi
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo()
+                {
+                    Version = "v1",
+                    Title = "ProductOrderApi",
+                    Description = "An API for managing orders of products in retail",
+                });
+
+                string xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            });
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
             {

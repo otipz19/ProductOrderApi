@@ -9,6 +9,7 @@ namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -21,7 +22,12 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Returns list of all products
+        /// </summary>
+        /// <response code="200">Returns list of all products</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<GetProductDto>>> GetAll()
         {
             var products = await _context.Products
@@ -32,7 +38,14 @@ namespace WebApi.Controllers
                 .ToList();
         }
 
+        /// <summary>
+        /// Returns product with specified id
+        /// </summary>
+        /// <response code="200">Returns product with specified id</response>
+        /// <response code="404">If product with specified id does not exist</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetProductDto>> Get(int id)
         {
             Product product = await _context.Products
@@ -45,12 +58,16 @@ namespace WebApi.Controllers
             return _mapper.Map<GetProductDto>(product);
         }
 
+        /// <summary>
+        /// Creates new product and returns it
+        /// </summary>
+        /// <response code="201">Returns newly created product</response>
+        /// <response code="400">If validation failed</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<GetProductDto>> Post(UpsertProductDto upsertDto)
         {
-            if (upsertDto is null)
-                return BadRequest();
-
             Product product = _mapper.Map<Product>(upsertDto);
 
             _context.Products.Add(product);
@@ -60,12 +77,16 @@ namespace WebApi.Controllers
             return CreatedAtAction(nameof(Get), new { id = getDto.Id }, getDto);
         }
 
+        /// <summary>
+        /// Updates product with specified id
+        /// </summary>
+        /// <response code="204">If successed</response>
+        /// <response code="400">If validation failed</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Put(int id, UpsertProductDto upsertDto)
         {
-            if (upsertDto is null)
-                return BadRequest();
-
             Product toUpdate = await _context.Products.FindAsync(id);
 
             if (toUpdate is null)
@@ -79,6 +100,13 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes product with specified id
+        /// </summary>
+        /// <response code="204">If successed</response>
+        /// <response code="404">If product with specified id does not exist</response>
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
