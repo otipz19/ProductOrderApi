@@ -1,15 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Entities
 {
+    [PrimaryKey(nameof(ProductId), nameof(OrderId))]
     public class ProductInOrder
     {
-        [Key]
         public int ProductId { get; set; }
 
         public virtual Product Product { get; set; }
 
-        [Key]
         public int OrderId { get; set; }
 
         public virtual Order Order { get; set; }
